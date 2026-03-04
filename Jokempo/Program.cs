@@ -1,61 +1,159 @@
-﻿// See https://aka.ms/new-console-template for more information
 using System;
+using System.Text;
 
-Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.OutputEncoding = Encoding.UTF8;
 
-Console.WriteLine("😀 Olá! Vamos jogar Jokempo?");
-Console.WriteLine("1 - Sim ou 0 - Não");
+string nomeJogador = "";
+int vitorias = 0;
+int derrotas = 0;
+int empates = 0;
 
-var continuar = Console.ReadKey().KeyChar;
+IniciarJogador(ref nomeJogador);
 
-while(continuar == '1')
+bool continuar = true;
+
+while (continuar)
 {
-    Console.WriteLine("Então vamos começar...");
-    Console.WriteLine("Escolha uma opção: 0 - Pedra ✊, 1 - Papel ✋ ou 2 - Tesoura ✌");
-    var opcao = Console.ReadKey().KeyChar;
+    MostrarMenu();
 
-    var opcaoPC = new Random().Next(3);
+    int opcaoMenu;
+    if (!LerOpcao(out opcaoMenu, 0, 3))
+        continue;
 
-    bool vitoria = false;
-
-    switch (opcao)
+    switch (opcaoMenu)
     {
-        case '0':
-            Console.WriteLine("\nVocê escoheu Pedra ✊!");
-            vitoria = (opcaoPC == 2);
-            break;
-        case '1':
-            Console.WriteLine("\nVocê escoheu Papel ✋");
-            vitoria = (opcaoPC == 0);
-            break;
-        case '2':
-            Console.WriteLine("\nVocê escoheu Tesoura ✌");
-            vitoria = (opcaoPC == 1);
-            break;
-    }
-
-    switch (opcaoPC)
-    {
-        case 0:
-            Console.WriteLine("\nEu escolhi Pedra ✊!");
-            break;
         case 1:
-            Console.WriteLine("\nEu escolhi Papel ✋");
+            Jogar(nomeJogador, ref vitorias, ref derrotas, ref empates);
             break;
+
         case 2:
-            Console.WriteLine("\nEu escolhi Tesoura ✌");
+            MostrarEstatisticas(nomeJogador, in vitorias, in derrotas, in empates);
+            break;
+
+        case 3:
+            IniciarJogador(ref nomeJogador);
+            vitorias = derrotas = empates = 0;
+            break;
+
+        case 0:
+            continuar = false;
             break;
     }
-
-    if (int.Parse(opcao.ToString()) == opcaoPC)
-        Console.WriteLine("\n😀 Legal! Nós empatamos!");
-    else if (vitoria)
-        Console.WriteLine("\n😀 Parabéns! Você venceu.");
-    else
-        Console.WriteLine("\n😀 Haha, eu venci! Não foi dessa vez. Você pode ter mais sorte na próxima.");
-
-    Console.WriteLine("\nQuer jogar de novo?");
-    Console.WriteLine("1 - Sim ou 0 - Não");
-    continuar = Console.ReadKey().KeyChar;
 }
-Console.WriteLine("👋 Tchau! Até a próxima");
+
+Console.WriteLine("👋 Tchau! Até a próxima!");
+
+
+// ===================== MÉTODOS =====================
+
+void IniciarJogador(ref string nome)
+{
+    Console.Write("\nDigite o nome do jogador: ");
+    nome = Console.ReadLine();
+
+    while (string.IsNullOrWhiteSpace(nome))
+    {
+        Console.Write("Nome inválido. Digite novamente: ");
+        nome = Console.ReadLine();
+    }
+}
+
+void MostrarMenu()
+{
+    Console.WriteLine("\n===== MENU =====");
+    Console.WriteLine("1 - Jogar");
+    Console.WriteLine("2 - Ver Estatísticas");
+    Console.WriteLine("3 - Trocar Jogador");
+    Console.WriteLine("0 - Sair");
+    Console.Write("Escolha uma opção: ");
+}
+
+bool LerOpcao(out int valor, int min, int max)
+{
+    if (!int.TryParse(Console.ReadLine(), out valor))
+    {
+        Console.WriteLine("Entrada inválida! Digite apenas números.");
+        return false;
+    }
+
+    if (valor < min || valor > max)
+    {
+        Console.WriteLine("Opção fora do intervalo permitido.");
+        return false;
+    }
+
+    return true;
+}
+
+void Jogar(string nome, ref int vitorias, ref int derrotas, ref int empates)
+{
+    Console.WriteLine("\nEscolha: 0 - Pedra ✊ | 1 - Papel ✋ | 2 - Tesoura ✌");
+    Console.Write("Sua escolha: ");
+
+    int opcaoJogador;
+    if (!LerOpcao(out opcaoJogador, 0, 2))
+        return;
+
+    int opcaoPC = new Random().Next(3);
+
+    MostrarEscolhaJogador(nome, opcaoJogador);
+    MostrarEscolhaPC(opcaoPC);
+
+    VerificarResultado(opcaoJogador, opcaoPC, ref vitorias, ref derrotas, ref empates);
+}
+
+void MostrarEscolhaJogador(string nome, int opcao)
+{
+    Console.WriteLine($"\n{nome} escolheu {ConverterOpcao(opcao)}");
+}
+
+void MostrarEscolhaPC(int opcao)
+{
+    Console.WriteLine($"Computador escolheu {ConverterOpcao(opcao)}");
+}
+
+string ConverterOpcao(in int opcao)
+{
+    return opcao switch
+    {
+        0 => "Pedra ✊",
+        1 => "Papel ✋",
+        2 => "Tesoura ✌",
+        _ => "Desconhecido"
+    };
+}
+
+void VerificarResultado(int jogador, int pc, ref int vitorias, ref int derrotas, ref int empates)
+{
+    if (jogador == pc)
+    {
+        Console.WriteLine("\n😀 Empate!");
+        empates++;
+        return;
+    }
+
+    bool ganhou =
+        (jogador == 0 && pc == 2) ||
+        (jogador == 1 && pc == 0) ||
+        (jogador == 2 && pc == 1);
+
+    if (ganhou)
+    {
+        Console.WriteLine("\n😀 Você venceu!");
+        vitorias++;
+    }
+    else
+    {
+        Console.WriteLine("\n😀 Você perdeu!");
+        derrotas++;
+    }
+}
+
+void MostrarEstatisticas(string nome, in int vitorias, in int derrotas, in int empates)
+{
+    Console.WriteLine("\n===== ESTATÍSTICAS =====");
+    Console.WriteLine($"Jogador: {nome}");
+    Console.WriteLine($"Vitórias: {vitorias}");
+    Console.WriteLine($"Derrotas: {derrotas}");
+    Console.WriteLine($"Empates: {empates}");
+}
