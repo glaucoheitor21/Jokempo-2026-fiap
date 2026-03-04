@@ -1,9 +1,9 @@
-## Grupo
+# Grupo
 Glauco Heitor Gonçalves - RM 555978
 
 Pedro Junqueira - RM 556278
 
-##🔥 O que foi aplicado
+#🔥 O que foi aplicado
 
 ref → para atualizar estatísticas (vitórias, derrotas, empates)
 
